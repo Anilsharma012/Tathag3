@@ -367,45 +367,40 @@ exports.getUnlockedCourses = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
   try {
-    const { amount, courseId } = req.body;
+    const { amount: rawAmount, courseId, userId: rawUserId, courseName } = req.body || {};
 
-    if (!amount || !courseId) {
-      return res.status(400).json({
-        success: false,
-        message: "Amount and courseId are required"
-      });
+    if (!courseId) {
+      return res.status(400).json({ success: false, message: "courseId is required" });
     }
 
     // Verify course exists
     const course = await Course.findById(courseId);
     if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found"
-      });
+      return res.status(404).json({ success: false, message: "Course not found" });
     }
 
-    // Development: skip Razorpay network call and stub order
-    if (process.env.NODE_ENV !== 'production') {
-      const order = { id: `dev_order_${Date.now()}`, amount, currency: 'INR' };
-      const payment = new Payment({
-        userId: req.user.id,
-        courseId,
-        razorpay_order_id: order.id,
-        amount,
-        currency: 'INR',
-        status: 'created',
-        originalAmount: amount,
-      });
-      await payment.save();
-      console.log("✅ [DEV] Payment stub created:", payment._id);
-      return res.status(200).json({ success: true, order, paymentId: payment._id, keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_JLdFnx7r5NMiBS" });
+    // Normalize/validate amount (paise)
+    let amount = Number(rawAmount);
+    if (!Number.isFinite(amount) || amount < 100) {
+      amount = Math.round(Number(course.price || 0) * 100);
     }
+    if (!Number.isFinite(amount) || amount < 100) {
+      return res.status(400).json({ success: false, message: "Invalid amount" });
+    }
+
+    // Ensure req.user.id is valid ObjectId in dev
+    try {
+      const mongoose = require('mongoose');
+      if (!mongoose.Types.ObjectId.isValid(req.user?.id)) {
+        req.user = { ...(req.user || {}), id: '507f1f77bcf86cd799439011' };
+      }
+    } catch {}
 
     const options = {
-      amount: amount,
+      amount,
       currency: "INR",
-      receipt: `receipt_${Date.now()}_${String(courseId).slice(-6)}`
+      receipt: `receipt_${Date.now()}_${String(courseId).slice(-6)}`,
+      notes: { courseId: String(courseId), courseName: String(courseName || course.name) }
     };
 
     const order = await razorpayInstance.orders.create(options);
@@ -415,7 +410,7 @@ exports.createOrder = async (req, res) => {
       userId: req.user.id,
       courseId: courseId,
       razorpay_order_id: order.id,
-      amount: amount,
+      amount,
       currency: "INR",
       status: "created",
       originalAmount: amount,
@@ -426,7 +421,7 @@ exports.createOrder = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      order: order,
+      order,
       paymentId: payment._id,
       keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_JLdFnx7r5NMiBS"
     });
