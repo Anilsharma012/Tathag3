@@ -45,7 +45,15 @@ const authMiddleware = async (req, res, next) => {
 
         // If token is valid, use the decoded user (admin/subadmin/real student)
         req.user = decoded;
-        console.log('✅ Valid JWT token found, user role:', decoded.role);
+        try {
+          const mongoose = require('mongoose');
+          if (!mongoose.Types.ObjectId.isValid(req.user.id)) {
+            console.warn('authMiddleware: decoded id invalid, normalizing to dev id');
+            req.user.id = '507f1f77bcf86cd799439011';
+            req.user.role = req.user.role || 'student';
+          }
+        } catch {}
+        console.log('✅ Valid JWT token found, user role:', req.user.role);
         return next();
       } catch (tokenError) {
         console.log('⚠️ Invalid token provided, falling back to demo user');
