@@ -38,7 +38,7 @@
   },
   "scripts": {
     "start": "cross-env PORT=3001 react-scripts start",
-    "start:backend": "cd ../backend && npm start",
+    "start:backend": "cd ../backend1 && npm run dev",
     "dev": "concurrently -n backend,frontend -c green,blue \"npm run start:backend\" \"cross-env PORT=3001 react-scripts start\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
