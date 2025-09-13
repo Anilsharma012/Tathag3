@@ -14,7 +14,7 @@ export const demoPurchaseCourse = async (courseId) => {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ amount: 150000 }) // ₹1500 in paise
+      body: JSON.stringify({ amount: 150000, courseId }) // ₹1500 in paise
     });
 
     const orderData = await orderResponse.json();

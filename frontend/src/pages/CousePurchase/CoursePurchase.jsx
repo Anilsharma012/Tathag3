@@ -179,12 +179,13 @@ const CoursePurchase = () => {
 
       try {
         const courseId = (course && course._id) || '6835a4fcf528e08ff15a566e';
-        const courseRes = await fetch(`/api/courses/${courseId}`);
+        const courseRes = await fetch(`/api/courses/student/published-courses/${courseId}`);
         if (courseRes.ok) {
           const courseData = await courseRes.json();
-          if (courseData.course) {
-            amountInPaise = courseData.course.price * 100;
-            courseName = courseData.course.name || courseName;
+          const c = courseData.course || courseData.data || courseData;
+          if (c && (c.price || c.name)) {
+            if (typeof c.price === 'number') amountInPaise = c.price * 100;
+            courseName = c.name || courseName;
           }
         }
       } catch { /* ignore and use defaults */ }
@@ -193,7 +194,7 @@ const CoursePurchase = () => {
       const orderRes = await fetch("/api/user/payment/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount: amountInPaise })
+        body: JSON.stringify({ amount: amountInPaise, courseId: course._id })
       });
 
       if (!orderRes.ok) {
@@ -472,7 +473,21 @@ const CoursePurchase = () => {
                 marginTop: "15px",
                 transition: "0.3s",
               }}
-              onClick={handlePayment}
+              onClick={() => {
+                const token = localStorage.getItem('authToken');
+                if (!token) { return window?.toast?.error ? window.toast.error('Please login') : alert('Please login'); }
+                let payload = {};
+                try { payload = JSON.parse(atob(token.split('.')[1] || '')) || {}; } catch {}
+                const params = {
+                  courseId: course?._id,
+                  userId: payload?.id || payload?._id,
+                  amountINR: course?.price || 1500,
+                  courseName: course?.name || 'Course Purchase',
+                  userEmail: payload?.email || 'test@example.com',
+                  userPhone: '9999999999'
+                };
+                if (window.buyCourse) window.buyCourse(params);
+              }}
             >
               Buy Now
             </button>

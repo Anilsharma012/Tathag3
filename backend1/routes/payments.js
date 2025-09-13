@@ -12,6 +12,9 @@ const upload = require('../middleware/uploadMiddleware');
 // Map create-order for CRM use-cases (proxy to user controller)
 router.post('/create-order', authMiddleware, userController.createOrder);
 
+// Verify payment alias (maps to userController.verifyAndUnlockPayment)
+router.post('/verify', authMiddleware, userController.verifyAndUnlockPayment);
+
 // Simple webhook to update CRM invoice paid amounts
 router.post('/webhook', async (req, res) => {
   try {
