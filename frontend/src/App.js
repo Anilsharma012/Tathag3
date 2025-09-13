@@ -98,6 +98,7 @@ import Testimonial from "./pages/Testimonial/Testimonial";
 import CourseComprasion from "./components/CourseComprasion/CourseComprasion";
 import FAQ from "./components/FAQ/FAQ";
 import Mycourse from "./components/MyCourses/Mycourse";
+import MyCourses from "./pages/MyCourses/MyCourses";
 import ExploreBlog from "./components/ExploreBlog/ExploreBlog";
 import Instruction from "./components/Instruction/Instruction";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
@@ -463,7 +464,7 @@ const AppContent = () => {
         <Route path="/cat" element={<Cat />} />
         <Route path="/compare" element={<CourseComprasion />} />
         <Route path="/faqs" element={<FAQ />} />
-        <Route path="/my-courses" element={<Mycourse />} />
+        <Route path="/my-courses" element={<MyCourses />} />
         <Route path="/explore-blog" element={<ExploreBlog />} />
         <Route path="/instruction" element={<Instruction />} />
 

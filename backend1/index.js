@@ -686,6 +686,7 @@ safeUse("/api/ocr", "./routes/ocr");
 safeUse("/api/omr", "./routes/omr");
 safeUse("/api", "./routes/reports");
 safeUse("/api/payments", "./routes/payments");
+safeUse("/api/pay", "./routes/payments");
 safeUse("/api/practice-tests", "./routes/practiceTestRoutes");
 safeUse("/api", "./routes/nextStep");
 safeUse("/api/admin", "./routes/batchesAdmin");
